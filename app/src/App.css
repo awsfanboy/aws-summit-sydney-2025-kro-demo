@@ -1,0 +1,52 @@
+.error {
+  color: #ff6b6b;
+  background-color: rgba(27, 94, 32, 0.9);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dev-notice {
+  color: #ffd166;
+  background-color: rgba(27, 94, 32, 0.9);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.feijoa-animation {
+  animation: bounce 1s ease infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.bucket-controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.bucket-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bucket-display {
+  position: relative;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Feijoa Bucket App</title>
+    <script>
+      // Polyfill for global object needed by AWS SDK
+      window.global = window;
+      window.process = { env: {} };
+      // AWS SDK configuration
+      window.AWS_SDK_LOAD_CONFIG = 1;
+    </script>
+    <!-- Load runtime configuration -->
+    <script src="/config.js"></script>
+    <script src="/aws-config.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

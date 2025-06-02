@@ -1,0 +1,26 @@
+apiVersion: kro.run/v1alpha1
+kind: FeijoaAppStack
+metadata:
+  name: store
+  namespace: default
+spec:
+  name: store
+  team: devteam
+  namespace: default
+  # Replace with your ECR repository URL
+  image: xxxxxxxxxxxx.dkr.ecr.ap-southeast-2.amazonaws.com/feijoa-app:latest
+  replicas: 2
+  containerPort: 80
+  ingress:
+    enabled: true
+  resourceRequests:
+    cpu: 100m
+    memory: 256Mi
+  resourceLimits:
+    cpu: 200m
+    memory: 512Mi
+  poddisruptionbudget:
+    maxUnavailable: 1
+  clusterName: dev-demo-cluster
+  dynamodb:
+    tableName: feijoa-app-store

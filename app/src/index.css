@@ -1,0 +1,124 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #2E7D32; /* Feijoa green background */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 2.2em;
+  line-height: 1.1;
+  color: #F1F8E9;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+  color: #F1F8E9;
+}
+
+button {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.7em 1.4em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #8BC34A; /* Light green */
+  color: #33691E; /* Dark green text */
+  cursor: pointer;
+  transition: all 0.25s;
+  margin: 0 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+button:hover {
+  border-color: #F1F8E9;
+  background-color: #9CCC65;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.container {
+  max-width: 800px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(27, 94, 32, 0.8); /* Slightly transparent dark green */
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card {
+  padding: 2em;
+  margin-bottom: 1em;
+  background-color: rgba(46, 125, 50, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bucket-value {
+  font-size: 2em;
+  margin: 1em 0;
+  color: #F1F8E9;
+  font-weight: bold;
+}
+
+.icon-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  button {
+    margin: 5px;
+    padding: 0.6em 1.2em;
+  }
+  
+  .bucket-controls {
+    flex-direction: column;
+  }
+}

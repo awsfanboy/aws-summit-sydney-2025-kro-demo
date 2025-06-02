@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Feijoa fruit shape -->
+  <ellipse cx="50" cy="55" rx="35" ry="40" fill="#8BC34A" />
+  <!-- Feijoa top stem -->
+  <path d="M50 15 L50 30" stroke="#5D4037" stroke-width="4" stroke-linecap="round" />
+  <!-- Feijoa crown/calyx -->
+  <path d="M35 30 Q50 15 65 30" fill="#7CB342" stroke="#5D4037" stroke-width="2" />
+  <!-- Feijoa texture lines -->
+  <path d="M30 45 Q50 55 70 45" stroke="#689F38" stroke-width="2" fill="none" />
+  <path d="M25 60 Q50 70 75 60" stroke="#689F38" stroke-width="2" fill="none" />
+  <path d="M30 75 Q50 85 70 75" stroke="#689F38" stroke-width="2" fill="none" />
+</svg>

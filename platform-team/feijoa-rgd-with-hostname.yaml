@@ -1,0 +1,260 @@
+apiVersion: kro.run/v1alpha1
+kind: ResourceGraphDefinition
+metadata:
+  name: feijoaappstack.kro.run
+spec:
+  schema:
+    apiVersion: v1alpha1
+    kind: FeijoaAppStack
+    spec:
+      name: string
+      team: string 
+      image: string | default="nginx"
+      namespace: string | default="default"
+      replicas: integer | default=3
+      containerPort: integer | default=80
+      poddisruptionbudget:
+        maxUnavailable: integer | default=1
+      ingress:
+        enabled: boolean | default=false
+      clusterName: string | default="dev-demo-cluster"
+      dynamodb:
+        tableName: string | default="${schema.spec.name}-table"
+      region: string | default="ap-southeast-2"
+      resourceRequests:
+        cpu: string | default="100m"
+        memory: string | default="256Mi"
+      resourceLimits:
+        cpu: string | default="200m"
+        memory: string | default="512Mi"
+    status:
+      deploymentConditions: ${deployment.status.conditions}
+      availableReplicas: ${deployment.status.availableReplicas}
+      serviceAccount: ${serviceaccount.metadata.name}
+      dynamodbTableName: ${dynamodbtable.spec.tableName}
+      dynamodbTableArn: ${dynamodbtable.status.ackResourceMetadata.arn}
+
+  resources:
+  - id: policy
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Policy
+      metadata:
+        name: ${schema.spec.name}-policy
+      spec:
+        name: ${schema.spec.name}-policy
+        policyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:BatchGetItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:Query",
+                  "dynamodb:Scan",
+                  "dynamodb:UpdateItem"
+                ],
+                "Resource": "${dynamodbtable.status.ackResourceMetadata.arn}"
+              }
+            ]
+          }
+        tags:
+          - key: App
+            value: ${schema.spec.name}
+          - key: Environment
+            value: ${schema.spec.clusterName}
+          - key: Owner
+            value: ${schema.spec.team}
+  - id: role
+    template:
+      apiVersion: iam.services.k8s.aws/v1alpha1
+      kind: Role
+      metadata:
+        name: ${schema.spec.name}-role
+      spec:
+        name: ${schema.spec.name}-role
+        policies:
+        - ${policy.status.ackResourceMetadata.arn}
+        assumeRolePolicyDocument: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "pods.eks.amazonaws.com"
+                },
+                "Action": [
+                  "sts:AssumeRole",
+                  "sts:TagSession"
+                ]
+              }
+            ]
+          }
+        tags:
+          - key: App
+            value: ${schema.spec.name}
+          - key: Environment
+            value: ${schema.spec.clusterName}
+          - key: Owner
+            value: ${schema.spec.team}
+
+  - id: podidentityassociation
+    template:
+      apiVersion: eks.services.k8s.aws/v1alpha1
+      kind: PodIdentityAssociation
+      metadata:
+        name: ${schema.spec.name}
+      spec:
+        clusterName: ${schema.spec.clusterName}
+        roleARN: ${role.status.ackResourceMetadata.arn}
+        serviceAccount: ${serviceaccount.metadata.name}
+        namespace: ${schema.spec.namespace}
+        tags:
+          App: ${schema.spec.name}
+          Environment: ${schema.spec.clusterName}
+          Owner: ${schema.spec.team}
+
+
+
+  - id: dynamodbtable
+    template:
+      apiVersion: dynamodb.services.k8s.aws/v1alpha1
+      kind: Table
+      metadata:
+        name: ${schema.spec.name}-dynamodb
+      spec:
+        tableName: ${schema.spec.dynamodb.tableName}
+        attributeDefinitions:
+          - attributeName: id
+            attributeType: S
+        keySchema:
+          - attributeName: id
+            keyType: HASH
+        provisionedThroughput:
+          readCapacityUnits: 5
+          writeCapacityUnits: 5
+        tags:
+          - key: App
+            value: ${schema.spec.name}
+          - key: Environment
+            value: ${schema.spec.clusterName}
+          - key: Owner
+            value: ${schema.spec.team}
+
+  - id: deployment
+    template:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: ${schema.spec.name}
+      spec:
+        replicas: ${schema.spec.replicas}
+        selector:
+          matchLabels:
+            app: ${schema.spec.name}
+        template:
+          metadata:
+            labels:
+              app: ${schema.spec.name}
+          spec:
+            serviceAccountName: ${serviceaccount.metadata.name}
+            containers:
+              - name: ${schema.spec.name}
+                image: ${schema.spec.image}
+                imagePullPolicy: Always
+                ports:
+                  - containerPort: ${schema.spec.containerPort}
+                env:
+                  - name: DYNAMODB_TABLE_NAME
+                    value: ${dynamodbtable.spec.tableName}
+                  - name: DYNAMODB_TABLE_ARN
+                    value: ${dynamodbtable.status.ackResourceMetadata.arn}
+                  - name: AWS_REGION
+                    value: ${schema.spec.region}
+                resources:
+                  requests:
+                    cpu: ${schema.spec.resourceRequests.cpu}
+                    memory: ${schema.spec.resourceRequests.memory}
+                  limits:
+                    cpu: ${schema.spec.resourceLimits.cpu}
+                    memory: ${schema.spec.resourceLimits.memory}
+  
+  - id: service
+    template:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: ${schema.spec.name}-service
+      spec:
+        selector: ${deployment.spec.selector.matchLabels} 
+        ports:
+          - protocol: TCP
+            port: 80
+            targetPort: ${schema.spec.containerPort}
+    
+  - id: ingressclass
+    template:
+      apiVersion: networking.k8s.io/v1
+      kind: IngressClass
+      metadata:
+        name: eks-auto-alb
+      spec:
+        controller: eks.amazonaws.com/alb
+
+  - id: ingress
+    includeWhen:
+        - ${schema.spec.ingress.enabled} 
+    template:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: ${schema.spec.name}-ingress
+        annotations:
+          alb.ingress.kubernetes.io/scheme: internet-facing
+          alb.ingress.kubernetes.io/target-type: ip
+          alb.ingress.kubernetes.io/healthcheck-path: /health
+          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+          # Replace with your actual certificate ARN
+          alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-2:11111111111:certificate/aaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+          alb.ingress.kubernetes.io/tags: App=${schema.spec.name}, Environment=${schema.spec.clusterName}, Owner=${schema.spec.team}
+      spec:
+        ingressClassName: eks-auto-alb
+        # Use the ingress class defined above
+        rules:
+        # Replace with your actual domain name
+          - host: ${schema.spec.name}.your-domain-name.com
+            http:
+              paths:
+                - path: "/"
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: ${service.metadata.name} 
+                      port:
+                        number: 80
+
+  - id: serviceaccount
+    template:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: ${schema.spec.name}
+
+  - id: poddisruptionbudget
+    template:
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: ${schema.spec.name}-pod-distribution-budget
+      spec:
+        selector:
+          matchLabels:
+            app: ${schema.spec.name}
+        maxUnavailable: ${schema.spec.poddisruptionbudget.maxUnavailable}
+        unhealthyPodEvictionPolicy: AlwaysAllow
