@@ -219,7 +219,7 @@ spec:
           alb.ingress.kubernetes.io/scheme: internet-facing
           alb.ingress.kubernetes.io/target-type: ip
           alb.ingress.kubernetes.io/healthcheck-path: /health
-          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+          alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
           alb.ingress.kubernetes.io/tags: App=${schema.spec.name}, Environment=${schema.spec.clusterName}, Owner=${schema.spec.team}
       spec:
         ingressClassName: eks-auto-alb
